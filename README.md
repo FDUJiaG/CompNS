@@ -1,2 +1,2 @@
 # CompNS
-This repository is used to handle neuroscience-related project support.
+This repository is used to handle computational neuroscience-related project support.
