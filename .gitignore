@@ -132,5 +132,6 @@ dmypy.json
 .DS_Store
 
 # MV
-*.avi
+source/
+
 
