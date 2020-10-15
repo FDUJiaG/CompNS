@@ -70,7 +70,6 @@ def get_op_dict(root_path, op_list, f_style_dict):
 
 
 def get_output_dirs(r_path, o_dir="outputs", f_dir="figs", op_f_dir="op_figs"):
-
     # set output dir
     output_dir = os.path.join(r_path, o_dir)
     if not os.path.exists(output_dir):
@@ -171,7 +170,6 @@ def make_loc_df(df, loc_col_name, loc_index):
 
 
 def get_loc_df(file_path, axis_n, part_n):
-
     df = loc_read(file_path)
 
     if type(df) is bool:
@@ -208,7 +206,6 @@ def get_video_info(video):
 
 
 def video_to_figs_sequence(video, figs_dir, f_style_dict):
-
     # cut the video to images sequence
     try:
         print(print_info(), end=" ")
@@ -239,6 +236,7 @@ def rgb_to_temp(rgb_items, change_mat=[0.2989, 0.5870, 0.1140]):
 
 
 def frame_operator(frame, xy_list, pixel_value, part_name, v_size, reduce_rate=100, linewidth=2):
+    frame = cv2.UMat(frame)
     frame_show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     rate_step = 0.06
@@ -293,7 +291,6 @@ def time_format(m):
 
 
 def op_fig_name(f_index, pre_name="labeled_frame", frame_style=".jpeg", op_fps=20):
-
     m_per_fps = op_fps * 60
 
     f_fps = f_index % op_fps
@@ -444,7 +441,6 @@ def temperature_operator(f_style_dict, op_list, axis_name, part_name, is_out_ori
 
 
 def main():
-
     msl = 3
     start_time = datetime.now()
 
