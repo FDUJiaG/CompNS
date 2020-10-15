@@ -131,7 +131,12 @@ dmypy.json
 # Mac
 .DS_Store
 
-# MV
+# Data
 source/
+outputs/
+nh_mm2.avi
+nh_mm2DLC_resnet50_2mice-testOct17shuffle1_300000.csv
 
+# Test File
+test.ipynb
 
