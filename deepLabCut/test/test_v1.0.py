@@ -146,12 +146,17 @@ def get_loc_name_idx(columns_dicts, axis_n, part_n):
         axis_n * len(part_n)
     ))
 
-    location_index = [
-        list(zip(
-            columns_dicts["bodyparts"],
-            columns_dicts["coords"]
-        )).index(item) for item in location_names
-    ]
+    try:
+        location_index = [
+            list(zip(
+                columns_dicts["bodyparts"],
+                columns_dicts["coords"]
+            )).index(item) for item in location_names
+        ]
+    except:
+        print(print_info("E"), end=" ")
+        print("The location column name error. Please check again!")
+        return False
 
     loc_col_name = [
         '_'.join(location_names[idx]) for idx in range(len(location_names))
@@ -176,9 +181,14 @@ def get_loc_df(file_path, axis_n, part_n):
         return False
 
     columns_dicts = get_columns(df)
-    loc_col_name, loc_index = get_loc_name_idx(columns_dicts, axis_n, part_n)
 
-    return make_loc_df(df, loc_col_name, loc_index)
+    loc_col_info = get_loc_name_idx(columns_dicts, axis_n, part_n)
+
+    if loc_col_info:
+        loc_col_name, loc_index = loc_col_info[0], loc_col_info[1]
+        return make_loc_df(df, loc_col_name, loc_index)
+    else:
+        return False
 
 
 def get_video(file_path):
@@ -200,7 +210,7 @@ def get_video_info(video):
     v_size, v_fps = video.size, int(video.fps)
     v_total_fps = int(video.duration * video.fps)
     print(print_info(), end=" ")
-    print("The video size is {}, fps is {}.".format(v_size, v_fps))
+    print("The video size is {}, fps is {}, total fps is {}.".format(v_size, v_fps, v_total_fps))
 
     return v_size, v_fps, v_total_fps
 
@@ -222,8 +232,10 @@ def video_to_figs_sequence(video, figs_dir, f_style_dict):
 
 
 def get_pixel_value(frame, xy_list):
+
+    # Attention: x represent col，y represent row
     pixel_value = [
-        frame[item[0], item[1], :].tolist() for item in xy_list
+        frame[item[1], item[0], :].tolist() for item in xy_list
     ]
 
     return pixel_value
@@ -236,7 +248,7 @@ def rgb_to_temp(rgb_items, change_mat=[0.2989, 0.5870, 0.1140]):
 
 
 def frame_operator(frame, xy_list, pixel_value, part_name, v_size, reduce_rate=100, linewidth=2):
-    frame = cv2.UMat(frame)
+    # frame = cv2.UMat(frame)
     frame_show = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     rate_step = 0.06
@@ -332,7 +344,7 @@ def get_all_frame(
         if abs(min_v_fps - df_len) > op_fps / 10:
             print(print_info("E"), end=" ")
             print("The video length {} and marker length {} is not equal. Please Check Again!".format(
-                input_len, df_len
+                min_v_fps, df_len
             ))
             return False
 
@@ -354,13 +366,13 @@ def get_all_frame(
     print("Operateing the frames sequence...")
 
     for idx in range(op_len):
-        # frame = cv2.imread(input_list[idx])
-        frame = video.get_frame(idx)
+        frame = cv2.cvtColor(cv2.imread(input_list[idx]), cv2.COLOR_BGR2RGB)
+        # frame = video.get_frame(idx)
         xy_list = op_df.values[idx].reshape(-1, 2)
         pixel_value = get_pixel_value(frame, xy_list)
         op_frame = frame_operator(frame, xy_list, pixel_value, part_name, v_size, reduce_rate)
         cv2.imwrite(
-            os.path.join(output_dir, op_fig_name(idx)),
+            os.path.join(output_dir, op_fig_name(idx, op_fps=op_fps)),
             op_frame
         )
 
@@ -394,7 +406,7 @@ def labeled_video_output(op_figs_dir, v_fps, output_dir, output_file_name="outpu
     return True
 
 
-def temperature_operator(f_style_dict, op_list, axis_name, part_name, is_out_ori_figs=False):
+def temperature_operator(f_style_dict, op_list, axis_name, part_name, is_out_ori_figs=True):
     print(print_info(), end=" ")
     print("OpenCV Version is:", cv2.__version__)
 
@@ -445,7 +457,7 @@ def main():
     start_time = datetime.now()
 
     f_style_dict = {
-        "video": ".avi",
+        "video": ".mp4",
         "location": ".csv",
         "figure": ".jpeg"
     }
@@ -453,9 +465,13 @@ def main():
     op_list = ["video", "location"]
 
     axis_name = ["x", "y"]
+    # part_name = [
+    #     "bodyW",
+    #     "tailbaseW"
+    # ]
     part_name = [
-        "bodyW",
-        "tailbaseW"
+        "tail",
+        "objectA"
     ]
 
     if temperature_operator(f_style_dict, op_list, axis_name, part_name):
